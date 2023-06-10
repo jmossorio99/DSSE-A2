@@ -41,4 +41,8 @@ upper_bound <- function(column) {
 }
 data <- subset(data, act_effort <= upper_bound(data$act_effort))
 # boxplot after removing outliers
-ggplot(data = data, aes(y = act_effort)) + geom_boxplot() + scale_x_discrete() + labs(title = "Boxplot for variable act_effort", , caption="Source: Menzies et al. dataset", y = "act_effort")
+ggplot(data = data, aes(y = act_effort)) + geom_boxplot() + scale_x_discrete() + labs(title = "Boxplot for variable act_effort", caption="Source: Menzies et al. dataset", y = "act_effort")
+# cheking the mean and the variance
+var(data$act_effort)
+mean(data$act_effort)
+write_csv(data, "data_cleaned.csv")
