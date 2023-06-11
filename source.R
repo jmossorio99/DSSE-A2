@@ -1,6 +1,8 @@
 # libraries
 library(tidyverse)
 library(corrplot)
+library(foreign)
+library(rethinking)
 # reading the data
 #data <- read.arff("nasa93.arff")
 data <- read.csv("nasa93_subset.csv")
@@ -10,7 +12,7 @@ data <- as_tibble(data)
 sum(is.na(data))
 sum(is.na(data))
 # removing columns
-data <- select(data, cat2, year, cplx, acap, pcap, act_effort)
+data <- data[-c(1:2)]
 # defining factors
 data$cat2 <- as.factor(data$cat2)
 data$cplx <- as.factor(data$cplx)
@@ -39,10 +41,40 @@ upper_bound <- function(column) {
   ub <- q3 + 1.5 * interquartile_range
   return(ub)
 }
-data <- subset(data, act_effort <= upper_bound(data$act_effort))
+#data <- subset(data, act_effort <= upper_bound(data$act_effort))
 # boxplot after removing outliers
-ggplot(data = data, aes(y = act_effort)) + geom_boxplot() + scale_x_discrete() + labs(title = "Boxplot for variable act_effort", caption="Source: Menzies et al. dataset", y = "act_effort")
+#ggplot(data = data, aes(y = act_effort)) + geom_boxplot() + scale_x_discrete() + labs(title = "Boxplot for variable act_effort", caption="Source: Menzies et al. dataset", y = "act_effort")
 # cheking the mean and the variance
 var(data$act_effort)
 mean(data$act_effort)
-write_csv(data, "data_cleaned.csv")
+# random sample for prior predictive check
+max(rlnorm(1e5, 0, 2))
+# defining models
+m0 <- ulam(
+  alist(
+    act_effort ~ dgampois(lambda, phi),
+    log(lambda) <- alpha,
+    phi ~ exponential(1),
+    alpha ~ normal(0,2)
+  ), data = data, cores = 4, chains = 4, cmdstan = TRUE, log_lik = TRUE
+)
+
+m1 <- ulam(
+  alist(
+    act_effort ~ dgampois(lambda, phi),
+    log(lambda) <- a_pcap[pcap],
+    phi ~ exponential(1),
+    a_pcap[pcap] ~ normal(0,3)
+  ), data = data, cores = 4, chains = 4, cmdstan = TRUE, log_lik = TRUE
+)
+# sampling diagnostics
+precis(m0)
+trankplot(m0)
+precis(m1, depth = 2)
+trankplot(m1) 
+# posterior predictive checks
+postcheck(m1)
+# compare models
+compare(m0,m1,func=LOO)
+# plot
+plot(precis(m1, depth=2, pars = "a_pcap"))
