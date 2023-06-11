@@ -69,8 +69,23 @@ m0 <- ulam(
     alpha ~ normal(0,2)
   ), data = data, cores = 4, chains = 4, cmdstan = TRUE, log_lik = TRUE
 )
-
 m1 <- ulam(
+  alist(
+    act_effort ~ dgampois(lambda, phi),
+    log(lambda) <- a_cplx[cplx],
+    phi ~ exponential(1),
+    a_cplx[cplx] ~ normal(0,3)
+  ), data = data, cores = 4, chains = 4, cmdstan = TRUE, log_lik = TRUE
+)
+m2 <- ulam(
+  alist(
+    act_effort ~ dgampois(lambda, phi),
+    log(lambda) <- a_acap[acap],
+    phi ~ exponential(1),
+    a_acap[acap] ~ normal(0,3)
+  ), data = data, cores = 4, chains = 4, cmdstan = TRUE, log_lik = TRUE
+)
+m3 <- ulam(
   alist(
     act_effort ~ dgampois(lambda, phi),
     log(lambda) <- a_pcap[pcap],
@@ -86,6 +101,6 @@ trankplot(m1)
 # posterior predictive checks
 postcheck(m1)
 # compare models
-compare(m0,m1,func=LOO)
+compare(m0,m1,m2,m3, func=LOO)
 # plot
 plot(precis(m1, depth=2, pars = "a_pcap"))
