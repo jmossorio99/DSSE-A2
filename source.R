@@ -3,6 +3,17 @@ library(tidyverse)
 library(corrplot)
 library(foreign)
 library(rethinking)
+library(ggdag)
+library(ggplot2)
+# Graph
+dag <- dagitty::dagitty("dag {
+    year -> acap -> a_eff <- pcap
+    year -> cat2 -> cplx -> a_eff
+    year -> pcap
+  }")
+tidy_dag <- tidy_dagitty(dag)
+ggdag(tidy_dag) +
+  theme_dag()
 # reading the data
 #data <- read.arff("nasa93.arff")
 data <- read.csv("nasa93_subset.csv")
