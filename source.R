@@ -30,9 +30,9 @@ data$cplx <- as.factor(data$cplx)
 data$acap <- as.factor(data$acap)
 data$pcap <- as.factor(data$pcap)
 # change the names for the factor levels
-data$cplx <- fct_recode(data$cplx, "vl" = "1", "2" = "l", "3" = "n", "4" = "h", "5" = "vh", "6" = "xh")
-data$acap <- fct_recode(data$acap, "vl" = "1", "2" = "l", "3" = "n", "4" = "h", "5" = "vh", "6" = "xh")
-data$pcap <- fct_recode(data$pcap, "vl" = "1", "2" = "l", "3" = "n", "4" = "h", "5" = "vh", "6" = "xh")
+data$cplx <- fct_recode(data$cplx, "1" = "vl", "2" = "l", "3" = "n", "4" = "h", "5" = "vh", "6" = "xh")
+data$acap <- fct_recode(data$acap, "1" = "vl", "2" = "l", "3" = "n", "4" = "h", "5" = "vh", "6" = "xh")
+data$pcap <- fct_recode(data$pcap, "1" = "vl", "2" = "l", "3" = "n", "4" = "h", "5" = "vh", "6" = "xh")
 # column transformation to numeric for later analysis
 data$cat2 <- as.numeric(data$cat2)
 data$cplx <- as.numeric(data$cplx)
@@ -95,11 +95,13 @@ m3 <- ulam(
 )
 # sampling diagnostics
 precis(m0)
-trankplot(m0)
 precis(m1, depth = 2)
-trankplot(m1) 
+precis(m2, depth = 2)
+precis(m3, depth = 2)
+#trankplot(m0)
+#trankplot(m1) 
 # posterior predictive checks
-postcheck(m1)
+postcheck(m2)
 # compare models
 compare(m0,m1,m2,m3, func=LOO)
 # plot
