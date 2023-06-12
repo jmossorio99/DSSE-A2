@@ -115,4 +115,4 @@ postcheck(m1)
 # compare models
 compare(m0,m1,m2,m3, func=LOO)
 # plot
-plot(precis(m1, depth=2, pars = "a_pcap"))
+plot(precis(m1, depth=2, pars = "a_cplx"))
