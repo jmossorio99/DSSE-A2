@@ -12,7 +12,17 @@ dag <- dagitty::dagitty("dag {
     year -> pcap
   }")
 tidy_dag <- tidy_dagitty(dag)
-ggdag(tidy_dag) +
+tidy_dag <- dplyr::mutate(tidy_dag, colour = ifelse(name == "a_eff" | name == "cplx" | name == "acap" | name == "pcap", "Assignment 2 Analysis", "General Analysis"))
+tidy_dag %>%
+  ggplot(aes(
+    x = x,
+    y = y,
+    xend = xend,
+    yend = yend
+  )) +
+  geom_dag_point(aes(colour = colour)) +
+  geom_dag_edges() +
+  geom_dag_text() +
   theme_dag()
 # reading the data
 #data <- read.arff("nasa93.arff")
@@ -59,7 +69,7 @@ upper_bound <- function(column) {
 var(data$act_effort)
 mean(data$act_effort)
 # random sample for prior predictive check
-max(rlnorm(1e5, 0, 2))
+max(rlnorm(1e5, 0, 2.5))
 # defining models
 m0 <- ulam(
   alist(
@@ -74,7 +84,7 @@ m1 <- ulam(
     act_effort ~ dgampois(lambda, phi),
     log(lambda) <- a_cplx[cplx],
     phi ~ exponential(1),
-    a_cplx[cplx] ~ normal(0,3)
+    a_cplx[cplx] ~ normal(0,2.5)
   ), data = data, cores = 4, chains = 4, cmdstan = TRUE, log_lik = TRUE
 )
 m2 <- ulam(
@@ -82,7 +92,7 @@ m2 <- ulam(
     act_effort ~ dgampois(lambda, phi),
     log(lambda) <- a_acap[acap],
     phi ~ exponential(1),
-    a_acap[acap] ~ normal(0,3)
+    a_acap[acap] ~ normal(0,2.5)
   ), data = data, cores = 4, chains = 4, cmdstan = TRUE, log_lik = TRUE
 )
 m3 <- ulam(
@@ -90,18 +100,18 @@ m3 <- ulam(
     act_effort ~ dgampois(lambda, phi),
     log(lambda) <- a_pcap[pcap],
     phi ~ exponential(1),
-    a_pcap[pcap] ~ normal(0,3)
+    a_pcap[pcap] ~ normal(0,2.5)
   ), data = data, cores = 4, chains = 4, cmdstan = TRUE, log_lik = TRUE
 )
 # sampling diagnostics
-precis(m0)
+precis(m0, depth = 2)
 precis(m1, depth = 2)
 precis(m2, depth = 2)
 precis(m3, depth = 2)
 #trankplot(m0)
 #trankplot(m1) 
 # posterior predictive checks
-postcheck(m2)
+postcheck(m1)
 # compare models
 compare(m0,m1,m2,m3, func=LOO)
 # plot
